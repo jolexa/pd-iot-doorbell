@@ -1,9 +1,10 @@
 STACKNAME_BASE="pd-iot-doorbell"
+# This is the name of the thing you configured in the AWS Console
 THING_NAME="pd-iot-doorbell"
+# This is a region that supports AWS IoT
 REGION="us-east-2"
 # Bucket in REGION that is used for deployment
 BUCKET=$(STACKNAME_BASE)
-SSMKeyArn=$(shell aws kms --region $(REGION) describe-key --key-id alias/aws/ssm --query KeyMetadata.Arn)
 MD5=$(shell md5sum lambda/*.py | md5sum | cut -d ' ' -f 1)
 SERIAL=$(shell aws iot describe-thing --region $(REGION) --thing-name $(THING_NAME) --query attributes.serial)
 
