@@ -1,0 +1,53 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: IoT -> Lambda -> PD
+
+Parameters:
+  SerialNumber:
+    Type: String
+  Bucket:
+    Type: String
+  md5:
+    Type: String
+
+Resources:
+  IoTFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Sid: 'Lambda'
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+            - sts:AssumeRole
+      Path: "/cfn/"
+      Policies:
+      - PolicyName: SSM
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+            - ssm:GetParameters
+            Resource:
+            - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/*"
+  IoTFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: main.handler
+      Runtime: python3.6
+      CodeUri:
+        Bucket: !Ref Bucket
+        Key: !Ref md5
+      Role: !GetAtt IoTFunctionRole.Arn
+      Events:
+        IoT:
+          Type: IoTRule
+          Properties:
+            AwsIotSqlVersion: 2016-03-23
+            Sql: !Sub "SELECT * FROM 'iotbutton/${SerialNumber}'"
