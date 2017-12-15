@@ -33,9 +33,9 @@ Resources:
           Statement:
           - Effect: Allow
             Action:
-            - ssm:GetParameters
+            - ssm:GetParametersByPath
             Resource:
-            - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/*"
+            - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/pd-iot-doorbell"
   IoTFunction:
     Type: AWS::Serverless::Function
     Properties:
